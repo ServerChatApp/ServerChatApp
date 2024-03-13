@@ -12,9 +12,12 @@ public class Client {
 
     public static void main(String[] args) throws IOException {
         try {
+            // TODO: Create client and set login and register with server JPA with PostgreSql
             Scanner scan = new Scanner(System.in);
             System.out.print("Enter username: ");
             String username = scan.nextLine();
+
+            // TODO: Connect to server checking if username or email exists and the password is correct
             Socket socket = new Socket("localhost", 4321);
             Client client = new Client(socket, username);
             client.ListenForMessage();
