@@ -27,8 +27,9 @@ public class Server {
         try {
             while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
-                System.out.println("✓ New Client connected");
                 ClientHandler clientHandler = new ClientHandler(socket);
+                String username = clientHandler.getClientUsername();
+                System.out.println("✓ "+ username +" connected");
 
                 Thread thread = new Thread(clientHandler);
                 thread.start();
@@ -48,7 +49,4 @@ public class Server {
             e.printStackTrace();
         }
     }
-
-
-
 }
