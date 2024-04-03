@@ -1,3 +1,16 @@
+### environment ###
+*.log
+*.swp
+*.tmp
+*.bak
+*.cache
+*.out
+*.pid
+*.pidlock
+*.log.*
+*.env
+.env
+
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
