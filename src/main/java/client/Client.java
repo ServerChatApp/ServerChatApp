@@ -15,10 +15,10 @@ public class Client {
     private Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
-    private String username;
+    private static String username;
 
-    private String password;
-    private String passwordConfirm;
+    private static String password;
+    private static String passwordConfirm;
 
     public static void main(String[] args) throws IOException {
         try {
@@ -44,10 +44,10 @@ public class Client {
 
 
     private static void LoginRegisterMenu() throws IOException {
-        System.out.println("Welcome to the chat app."+"\n"+
-                "1. Login"+"\n"+
-                "2. Register"+"\n"+
-                "3. Guest"+"\n"+
+        System.out.println("Welcome to the chat app." + "\n" +
+                "1. Login" + "\n" +
+                "2. Register" + "\n" +
+                "3. Guest" + "\n" +
                 "0. Exit");
 
         System.out.println("Enter your choice:");
@@ -73,7 +73,7 @@ public class Client {
         }
     }
 
-    private void userChatChoice( String receiverUsername, String senderUsername ) throws IOException {
+    private void userChatChoice(String receiverUsername, String senderUsername) throws IOException {
         // TODO CHECK ALL ACTIVE USERS TO CHOICE USER TO CHAT
         // TODO: Implement logic to check all active users and allow the user to choose who to chat with
 
@@ -105,17 +105,17 @@ public class Client {
 
     public static void Register() {
 
-        String [] symbols = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "{", "}", "[", "]", "|", "\\", ":", ";", "'", "\"", ",", "<", ".", ">", "/", "?", " "};
-        String [] numbers = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        String[] symbols = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "{", "}", "[", "]", "|", "\\", ":", ";", "'", "\"", ",", "<", ".", ">", "/", "?", " "};
+        String[] numbers = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
         while (true) {
             System.out.println("Register a new account.");
             System.out.print("Username: ");
-            String username = scan.nextLine();
+            username = scan.nextLine();
             System.out.print("Password: ");
-            String password = scan.nextLine();
+            password = scan.nextLine();
             System.out.println("Confirm password: ");
-            String passwordConfirm = scan.nextLine();
+            passwordConfirm = scan.nextLine();
 
             if (password.contains(" ")) {
                 System.out.println("Password cannot contain spaces.");
@@ -132,17 +132,7 @@ public class Client {
             if (password.length() < 8) {
                 System.out.println("Password must be at least 8 characters long.");
             }
-
-            if (password.equals(passwordConfirm) && !username.isEmpty() && !password.isEmpty()) {
-                break;
-            }
-
         }
-
-        // TODO: Create client and redirect to login
-
-
-
     }
 
     public static void Login() {
@@ -160,7 +150,7 @@ public class Client {
             }
 
             // TODO: Connect to server checking if username or email exists and the password is correct
-//            if (username && password) {
+//            if (checkLogin(username, password) {
 //                System.out.println("✓ Login successful.");
 //                break;
 //            } else {
@@ -193,16 +183,6 @@ public class Client {
             Client clientGuest = new Client(socket, username);
             clientGuest.ListenForMessage();
             clientGuest.sendMessage();
-
-            // TODO: Connect to server checking if username or email exists and the password is correct
-//            if (username && password) {
-//                System.out.println("✓ Login successful.");
-//                break;
-//            } else {
-//                System.out.println("✕ Login failed try again.");
-//            }
-
-            // test login
             break;
         }
 
@@ -232,6 +212,16 @@ public class Client {
         }
     }
 
+    // TODO: Implement logic to check if the username and password are correct with connection to DB
+    private boolean checkLogin(String username, String password) {
+        return false;
+    }
+
+    // TODO: Implement register logic to a new user with connection to DB
+    private boolean checkRegister(String username, String password) {
+        return false;
+    }
+
     public void sendMessage() {
         try {
             bufferedWriter.write(username);
@@ -241,7 +231,6 @@ public class Client {
             // TODO: Create client and set login and register with server JPA with PostgreSql
 
 
-
             // TODO: Connect to server checking if username or email exists and the password is correct
 
             Scanner scan = new Scanner(System.in);
@@ -249,8 +238,9 @@ public class Client {
                 System.out.print("> ");
                 String messageToSend = scan.nextLine();
                 if (messageToSend.equals("/exit")) {
+                    System.out.println("✓ Disconnected from server.");
+                    System.exit(0);
                     closeEverything(socket, bufferedReader, bufferedWriter);
-                    break;
                 }
                 bufferedWriter.write(username + ": " + messageToSend);
                 bufferedWriter.newLine();
