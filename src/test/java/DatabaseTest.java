@@ -28,6 +28,6 @@ public class DatabaseTest {
         assertTrue(connection.isValid(5));
     }
 
-    // Add more test methods as needed
+    // Agrega más métodos de prueba según sea necesario
 
 }
