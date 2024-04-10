@@ -5,7 +5,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Map;
 
 public class Database {
 
@@ -25,30 +24,16 @@ public class Database {
 
     private void loadEnvVariables() {
         Dotenv dotenv = Dotenv.load();
-        Map<String, String> env = (Map<String, String>) dotenv.load();
-        DB_HOST = env.get("DB_HOST");
-        DB_PORT = env.get("DB_PORT");
-        DB_NAME = env.get("DB_NAME");
-        DB_USER = env.get("DB_USER");
-        DB_PASSWORD = env.get("DB_PASSWORD");
+        DB_HOST = dotenv.get("DB_HOST");
+        DB_PORT = dotenv.get("DB_PORT");
+        DB_NAME = dotenv.get("DB_NAME");
+        DB_USER = dotenv.get("DB_USER");
+        DB_PASSWORD = dotenv.get("DB_PASSWORD");
     }
 
-    private StringBuilder getConnectionString() {
-        StringBuilder connectionString = new StringBuilder();
-        connectionString.append("jdbc:mariadb://");
-        connectionString.append(DB_HOST);
-        connectionString.append(":");
-        connectionString.append(DB_PORT);
-        connectionString.append("/");
-        connectionString.append(DB_NAME);
-        connectionString.append("?");
-        connectionString.append("user=");
-        connectionString.append(DB_USER);
-        connectionString.append("&");
-        connectionString.append("password=");
-        connectionString.append(DB_PASSWORD);
-        connectionString.append("&useSSL=false&allowPublicKeyRetrieval=true");
-        return connectionString;
+    private String getConnectionString() {
+        return "jdbc:mariadb://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME +
+                "?user=" + DB_USER + "&password=" + DB_PASSWORD + "&useSSL=false&allowPublicKeyRetrieval=true";
     }
 
     public void closeConnection(Connection connection) {
@@ -61,8 +46,7 @@ public class Database {
         }
     }
 
-    // getters & setters
-
+    // Getters & Setters
 
     public Connection getConnection() {
         return connection;
