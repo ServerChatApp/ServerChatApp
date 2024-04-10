@@ -119,20 +119,34 @@ public class Client {
 
             if (password.contains(" ")) {
                 System.out.println("Password cannot contain spaces.");
+                return;
             }
 
             if (!password.contains(Arrays.toString(symbols))) {
                 System.out.println("Password must contain at least one symbol.");
+                return;
             }
 
             if (!password.contains(Arrays.toString(numbers))) {
                 System.out.println("Password must contain at least one number.");
+                return;
             }
 
             if (password.length() < 8) {
                 System.out.println("Password must be at least 8 characters long.");
+                return;
             }
+
+            // todo conexión a la base de datos
+            if (ClientManager.register(username, password)){
+                System.out.println("✓ Registration successful.");
+                break;
+            } else {
+                System.out.println("Passwords do not match.");
+            }
+
         }
+
     }
 
     public static void Login() {
@@ -150,19 +164,15 @@ public class Client {
             }
 
             // TODO: Connect to server checking if username or email exists and the password is correct
-//            if (checkLogin(username, password) {
+//            if (ClientManager.checkLogin(username, password) {
 //                System.out.println("✓ Login successful.");
 //                break;
 //            } else {
 //                System.out.println("✕ Login failed try again.");
 //            }
 
-            // test login
-            System.out.println("✓ Login successful.");
-            break;
+
         }
-
-
     }
 
     public static void Guest() throws IOException {
