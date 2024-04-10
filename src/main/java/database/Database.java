@@ -10,12 +10,13 @@ public class Database {
 
     private Connection connection;
 
-    private String DB_DRIVER = "org.mariadb.jdbc.Driver";
+    private String DB_DRIVER = "jdbc:postgresql://";
     private String DB_HOST;
     private String DB_PORT;
     private String DB_NAME;
     private String DB_USER;
     private String DB_PASSWORD;
+    private String DB_SSL_MODE;
 
     public Database() throws SQLException {
         loadEnvVariables();
@@ -29,11 +30,12 @@ public class Database {
         DB_NAME = dotenv.get("DB_NAME");
         DB_USER = dotenv.get("DB_USER");
         DB_PASSWORD = dotenv.get("DB_PASSWORD");
+        DB_SSL_MODE = dotenv.get("DB_SSL_MODE");
     }
 
     private String getConnectionString() {
-        return "jdbc:mariadb://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME +
-                "?user=" + DB_USER + "&password=" + DB_PASSWORD + "&useSSL=false&allowPublicKeyRetrieval=true";
+        return DB_DRIVER + DB_HOST + ":" + DB_PORT + "/" + DB_NAME +
+                "?user=" + DB_USER + "&password=" + DB_PASSWORD + "&sslmode=" + DB_SSL_MODE;
     }
 
     public void closeConnection(Connection connection) {
@@ -102,5 +104,13 @@ public class Database {
 
     public void setDB_PASSWORD(String DB_PASSWORD) {
         this.DB_PASSWORD = DB_PASSWORD;
+    }
+
+    public String getDB_SSL_MODE() {
+        return DB_SSL_MODE;
+    }
+
+    public void setDB_SSL_MODE(String DB_SSL_MODE) {
+        this.DB_SSL_MODE = DB_SSL_MODE;
     }
 }
