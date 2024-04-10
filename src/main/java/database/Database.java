@@ -1,32 +1,41 @@
 package database;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Map;
 
 public class Database {
 
     private Connection connection;
 
-    // TODO IMPLEMENT dotenv and set variables on .env <-------
     private String DB_DRIVER = "org.mariadb.jdbc.Driver";
-    private String DB_HOST = "localhost";
-    private String DB_PORT = "3306";
-    private String DB_NAME = "database_name";
-    private String DB_USER = "user";
-    private String DB_PASSWORD = "password";
-
+    private String DB_HOST;
+    private String DB_PORT;
+    private String DB_NAME;
+    private String DB_USER;
+    private String DB_PASSWORD;
 
     public Database() throws SQLException {
-        connection = DriverManager.getConnection(
-                "jdbc:mariadb://localhost:3306/database_name",
-                "user", "password"
-        );
+        loadEnvVariables();
+        connection = DriverManager.getConnection(getConnectionString().toString());
+    }
+
+    private void loadEnvVariables() {
+        Dotenv dotenv = Dotenv.load();
+        Map<String, String> env = (Map<String, String>) dotenv.load();
+        DB_HOST = env.get("DB_HOST");
+        DB_PORT = env.get("DB_PORT");
+        DB_NAME = env.get("DB_NAME");
+        DB_USER = env.get("DB_USER");
+        DB_PASSWORD = env.get("DB_PASSWORD");
     }
 
     private StringBuilder getConnectionString() {
         StringBuilder connectionString = new StringBuilder();
-        connectionString.append(DB_DRIVER);
+        connectionString.append("jdbc:mariadb://");
         connectionString.append(DB_HOST);
         connectionString.append(":");
         connectionString.append(DB_PORT);
@@ -50,5 +59,64 @@ public class Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    // getters & setters
+
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
+    public String getDB_DRIVER() {
+        return DB_DRIVER;
+    }
+
+    public void setDB_DRIVER(String DB_DRIVER) {
+        this.DB_DRIVER = DB_DRIVER;
+    }
+
+    public String getDB_HOST() {
+        return DB_HOST;
+    }
+
+    public void setDB_HOST(String DB_HOST) {
+        this.DB_HOST = DB_HOST;
+    }
+
+    public String getDB_PORT() {
+        return DB_PORT;
+    }
+
+    public void setDB_PORT(String DB_PORT) {
+        this.DB_PORT = DB_PORT;
+    }
+
+    public String getDB_NAME() {
+        return DB_NAME;
+    }
+
+    public void setDB_NAME(String DB_NAME) {
+        this.DB_NAME = DB_NAME;
+    }
+
+    public String getDB_USER() {
+        return DB_USER;
+    }
+
+    public void setDB_USER(String DB_USER) {
+        this.DB_USER = DB_USER;
+    }
+
+    public String getDB_PASSWORD() {
+        return DB_PASSWORD;
+    }
+
+    public void setDB_PASSWORD(String DB_PASSWORD) {
+        this.DB_PASSWORD = DB_PASSWORD;
     }
 }
