@@ -19,7 +19,7 @@ public class DatabaseTest {
 
     @AfterEach
     public void tearDown() {
-        database.closeConnection(connection);
+        database.closeConnection();
     }
 
     @Test
