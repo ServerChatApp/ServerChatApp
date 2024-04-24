@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Client" type="Application" factoryName="Application" singleton="false" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="client.Client" />
+    <module name="ServerChatApp.main" />
+    <projectPathOnTarget name="projectPathOnTarget" value="{exitCode=0, timeout=false, cancelled=false, stdout=/mnt/c/Program Files/JetBrains/IntelliJ IDEA 2023.2.3/jbr/bin , stderr=}/ServerChatApp" />
+    <target name="WSL - Ubuntu" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="client.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
