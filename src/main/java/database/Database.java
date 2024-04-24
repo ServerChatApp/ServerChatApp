@@ -10,17 +10,17 @@ public class Database {
 
     private Connection connection;
 
-    private String DB_DRIVER = "jdbc:postgresql://";
-    private String DB_HOST;
-    private String DB_PORT;
-    private String DB_NAME;
-    private String DB_USER;
-    private String DB_PASSWORD;
-    private String DB_SSL_MODE;
+    private static String DB_DRIVER = "jdbc:postgresql://";
+    private static String DB_HOST;
+    private static String DB_PORT;
+    private static String DB_NAME;
+    private static String DB_USER;
+    private static String DB_PASSWORD;
+    private static String DB_SSL_MODE;
 
     public Database() throws SQLException {
         loadEnvVariables();
-        connection = DriverManager.getConnection(getConnectionString().toString());
+        connectToDatabase();
     }
 
     private void loadEnvVariables() {
@@ -33,20 +33,26 @@ public class Database {
         DB_SSL_MODE = dotenv.get("DB_SSL_MODE");
     }
 
-    private String getConnectionString() {
+    private void connectToDatabase() throws SQLException {
+        String connectionString = getConnectionString();
+        connection = DriverManager.getConnection(connectionString);
+    }
+
+    public static String getConnectionString() {
         return DB_DRIVER + DB_HOST + ":" + DB_PORT + "/" + DB_NAME +
                 "?user=" + DB_USER + "&password=" + DB_PASSWORD + "&sslmode=" + DB_SSL_MODE;
     }
 
-    public void closeConnection(Connection connection) {
+    public void closeConnection() {
         try {
-            if (connection != null) {
-                connection.close();
+            if (this.connection != null && !this.connection.isClosed()) {
+                this.connection.close();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     // Getters & Setters
 
