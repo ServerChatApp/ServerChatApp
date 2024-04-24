@@ -2,58 +2,131 @@ package client;
 
 import database.Database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.*;
+import java.util.Arrays;
+
+import static database.Database.getConnectionString;
 
 public class ClientManager {
 
-    static Database database;
+    private static Database database;
 
     static {
         try {
             database = new Database();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to initialize database", e);
         }
     }
 
-    public ClientManager() throws SQLException {
+    private ClientManager() {
     }
 
-    // Crear cliente y establecer inicio de sesión y registro con JPA del servidor utilizando la base de datos PostgreSQL
-    public static boolean register(String username, String password) {
+    // Método para loguear un nuevo usuario
 
+    public static boolean checkLogin(String username, String password) {
+        Connection connection = null;
+        PreparedStatement statement = null;
         try {
-            // Establecer conexión con la base de datos
-            Connection connection = database.getConnection();
+            connection = database.getConnection();
+            if (connection == null || connection.isClosed()) {
+                // Reestablecer la conexión aquí
+                String connectionString = getConnectionString();
+                connection = DriverManager.getConnection(connectionString);
+            }
+            statement = connection.prepareStatement("SELECT password FROM users WHERE username = ?");
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if (!resultSet.next()) {
+                // El usuario no existe
+                return false;
+            }
 
-            // Comprobar si el usuario ya existe
-            PreparedStatement checkStatement = connection.prepareStatement("SELECT COUNT(*) FROM users WHERE username = ?");
+            String hashedPassword = resultSet.getString("password");
+            return Arrays.equals(hashedPassword.getBytes(StandardCharsets.UTF_8), hashPassword(password).getBytes(StandardCharsets.UTF_8));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } finally {
+            // Cerrar los recursos en un bloque finally para evitar fugas de recursos
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Método para registrar un nuevo usuario
+    public static boolean register(String username, String password) {
+        try (Connection connection = database.getConnection();
+             PreparedStatement checkStatement = connection.prepareStatement("SELECT COUNT(*) FROM users WHERE username = ?");
+             PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?)")) {
+
+            // Resto del código para registrar el usuario...
+            // Aquí puedes ejecutar las consultas utilizando checkStatement y insertStatement
+
+            // Por ejemplo:
             checkStatement.setString(1, username);
             ResultSet resultSet = checkStatement.executeQuery();
             resultSet.next();
             int count = resultSet.getInt(1);
             if (count > 0) {
-                // El usuario ya existe, devolver false
+                // El usuario ya existe, devuelve false
                 return false;
             }
 
-            // Si el usuario no existe, insertarlo en la base de datos
-            PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?)");
             insertStatement.setString(1, username);
-            insertStatement.setString(2, password);
+            insertStatement.setString(2, hashPassword(password));
             insertStatement.executeUpdate();
 
-            // Cerrar conexión
-            database.closeConnection(connection);
-
-            // Registro exitoso, devolver true
+            // Registro exitoso, devuelve true
             return true;
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
+
+
+    // Method to create the users table if it does not exist
+    private static void createTable(Connection connection) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE, password VARCHAR(255))");
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private static String hashPassword(String password) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hash = md.digest(password.getBytes(StandardCharsets.UTF_8));
+        BigInteger number = new BigInteger(1, hash);
+        StringBuilder hexString = new StringBuilder(number.toString(16));
+        while (hexString.length() < 32) {
+            hexString.insert(0, '0');
+        }
+        return hexString.toString();
+    }
+
+
+    // Method to login a user
+
 }

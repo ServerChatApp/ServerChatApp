@@ -1,9 +1,14 @@
 package client;
 
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 import server.ClientHandler;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -23,19 +28,6 @@ public class Client {
     public static void main(String[] args) throws IOException {
         try {
             LoginRegisterMenu();
-
-
-//            // TODO: Create client and set login and register
-//            System.out.print("Username: ");
-//            String username = scan.nextLine();
-//            System.out.print("Password: ");
-//            String password = scan.nextLine();
-//
-//            // TODO: Connect to server checking if username or email exists and the password is correct
-//            Socket socket = new Socket("localhost", 4321);
-//            Client client = new Client(socket, username, password);
-//            client.ListenForMessage();
-//            client.sendMessage();
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("✕ Error creating client.");
@@ -44,32 +36,38 @@ public class Client {
 
 
     private static void LoginRegisterMenu() throws IOException {
-        System.out.println("Welcome to the chat app." + "\n" +
-                "1. Login" + "\n" +
-                "2. Register" + "\n" +
-                "3. Guest" + "\n" +
-                "0. Exit");
+        boolean bucle = false;
+        while (!bucle) {
+            System.out.println(" " +
+                    "Welcome to the chat app." + "\n" +
+                    "1. Login" + "\n" +
+                    "2. Register" + "\n" +
+                    "3. Guest" + "\n" +
+                    "0. Exit");
 
-        System.out.println("Enter your choice:");
-        System.out.print("> ");
-        String choice = scan.nextLine();
+            System.out.println("Enter your choice:");
+            System.out.print("> ");
+            String choice = scan.nextLine();
 
-        switch (choice) {
-            case "1":
-                Login();
-                break;
-            case "2":
-                Register();
-                break;
-            case "3":
-                Guest();
-                break;
-            case "0":
-                System.exit(0);
-                break;
-            default:
-                System.out.println("Invalid choice.");
-                break;
+            switch (choice) {
+                case "1":
+                    Login();
+
+                    break;
+                case "2":
+                    Register();
+                    break;
+                case "3":
+                    Guest();
+                    break;
+                case "0":
+                    System.out.println("✓ Exiting chat app.");
+                    bucle = true;
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+                    break;
+            }
         }
     }
 
@@ -102,56 +100,88 @@ public class Client {
 
     }
 
-
     public static void Register() {
+        boolean entrada = false;
 
-        String[] symbols = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "{", "}", "[", "]", "|", "\\", ":", ";", "'", "\"", ",", "<", ".", ">", "/", "?", " "};
-        String[] numbers = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        ArrayList<String> symbols = new ArrayList<>(Arrays.asList("!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "{", "}", "[", "]", "|", "\\", ":", ";", "'", "\"", ",", "<", ".", ">", "/", "?"));
+        ArrayList<String> numbers = new ArrayList<>(Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"));
 
-        while (true) {
-            System.out.println("Register a new account.");
-            System.out.print("Username: ");
-            username = scan.nextLine();
-            System.out.print("Password: ");
-            password = scan.nextLine();
-            System.out.println("Confirm password: ");
-            passwordConfirm = scan.nextLine();
+        try {
+            Terminal terminal = TerminalBuilder.builder().system(true).dumb(true).build();
+            LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();
 
-            if (password.contains(" ")) {
-                System.out.println("Password cannot contain spaces.");
-                return;
+            while (!entrada) {
+                int requirements = 0;
+                System.out.println("Register a new account.");
+                System.out.print("Username: ");
+                username = scan.nextLine();
+                password = lineReader.readLine("Password: ", '*');
+                passwordConfirm = lineReader.readLine("Confirm password: ", '*');
+
+                if (password.contains(" ")) {
+                    System.out.println("Password cannot contain spaces.");
+                    requirements--;
+                }
+
+                boolean containsSymbol = false;
+                for (String symbol : symbols) {
+                    if (password.contains(symbol)) {
+                        containsSymbol = true;
+                        break;
+                    }
+                }
+
+                if (!containsSymbol) {
+                    System.out.println("Password must contain at least one symbol.");
+                    requirements--;
+                }
+
+                boolean containsNumber = false;
+                for (String number : numbers) {
+                    if (password.contains(number)) {
+                        containsNumber = true;
+                        break;
+                    }
+                }
+
+                if (!containsNumber) {
+                    System.out.println("Password must contain at least one number.");
+                    requirements--;
+                }
+
+                if (password.length() < 8) {
+                    System.out.println("Password must be at least 8 characters long.");
+                    requirements--;
+                }
+
+                if (username.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {
+                    System.out.println("Username and password cannot be empty.");
+                } else if (!password.equals(passwordConfirm)) {
+                    System.out.println("Passwords do not match.");
+                } else {
+                    if (requirements < 0) {
+                        System.out.println("Password must contain at least one symbol, one number, and be at least 8 characters long.");
+                    } else {
+                        entrada = true;
+                    }
+                }
             }
-
-            if (!password.contains(Arrays.toString(symbols))) {
-                System.out.println("Password must contain at least one symbol.");
-                return;
-            }
-
-            if (!password.contains(Arrays.toString(numbers))) {
-                System.out.println("Password must contain at least one number.");
-                return;
-            }
-
-            if (password.length() < 8) {
-                System.out.println("Password must be at least 8 characters long.");
-                return;
-            }
-
-            // todo conexión a la base de datos
-            if (ClientManager.register(username, password)){
-                System.out.println("✓ Registration successful.");
-                break;
-            } else {
-                System.out.println("Passwords do not match.");
-            }
-
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
+        // Todo: conexión a la base de datos
+        if (ClientManager.register(username, password)) {
+            System.out.println("✓ Registration successful.");
+        } else {
+            System.out.println("✕ Registration failed.");
+        }
     }
 
-    public static void Login() {
 
-        while (true) {
+    public static void Login() throws IOException {
+        boolean entrada = false;
+
+        while (!entrada) {
             System.out.println("Login to your account.");
             System.out.print("Username: ");
             String username = scan.nextLine();
@@ -160,54 +190,41 @@ public class Client {
 
             if (username.isEmpty() || password.isEmpty()) {
                 System.out.println("Username and password cannot be empty.");
-                break;
             }
 
             // TODO: Connect to server checking if username or email exists and the password is correct
-//            if (ClientManager.checkLogin(username, password) {
-//                System.out.println("✓ Login successful.");
-//                break;
-//            } else {
-//                System.out.println("✕ Login failed try again.");
-//            }
-
-
+            if (ClientManager.checkLogin(username, password)) {
+                System.out.println("✓ Login successful.");
+                Socket socket = new Socket("localhost", 4321);
+                Client clientLogged = new Client(socket, username);
+                clientLogged.ListenForMessage();
+                clientLogged.sendMessage();
+                entrada = true;
+            } else {
+                System.out.println("✕ Login failed try again.");
+            }
         }
+
     }
 
     public static void Guest() throws IOException {
-
-        while (true) {
+        boolean entrada = false;
+        while (!entrada) {
             System.out.println("Login to your account.");
             System.out.print("Username: ");
             String username = scan.nextLine();
 
             if (username.isEmpty()) {
                 System.out.println("Username cannot be empty.");
-                break;
             }
 
-            System.out.println("✓ Login successful.");
+            System.out.println("✓ Guest logged successful.");
 
             Socket socket = new Socket("localhost", 4321);
             Client clientGuest = new Client(socket, username);
             clientGuest.ListenForMessage();
             clientGuest.sendMessage();
-            break;
-        }
-
-
-    }
-
-    public Client(Socket socket, String username, String password) {
-        try {
-            this.socket = socket;
-            this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            this.username = username;
-            this.password = password;
-        } catch (Exception e) {
-            closeEverything(socket, bufferedReader, bufferedWriter);
+            entrada = true;
         }
     }
 
@@ -220,16 +237,6 @@ public class Client {
         } catch (Exception e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
-    }
-
-    // TODO: Implement logic to check if the username and password are correct with connection to DB
-    private boolean checkLogin(String username, String password) {
-        return false;
-    }
-
-    // TODO: Implement register logic to a new user with connection to DB
-    private boolean checkRegister(String username, String password) {
-        return false;
     }
 
     public void sendMessage() {
