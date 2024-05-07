@@ -29,7 +29,7 @@ public class Server {
                 Socket socket = serverSocket.accept();
                 ClientHandler clientHandler = new ClientHandler(socket);
                 String username = clientHandler.getClientUsername();
-                System.out.println("✓ "+ username +" connected");
+                System.out.println("✓ "+ username +" connected.");
 
                 Thread thread = new Thread(clientHandler);
                 thread.start();
